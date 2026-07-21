@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://thesis-arena.local/schemas/analysis-v1.json",
+  "title": "Thesis Arena analysis response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "input", "claims", "agents", "synthesis", "meta"],
+  "properties": {
+    "version": { "const": "1.0" },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["thesis"],
+      "properties": { "thesis": { "type": "string", "minLength": 1 } }
+    },
+    "claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "text", "type", "label", "tone"],
+        "properties": {
+          "id": { "type": "string" },
+          "text": { "type": "string" },
+          "type": { "type": "string" },
+          "label": { "type": "string" },
+          "tone": { "enum": ["red", "teal", "blue", "amber"] }
+        }
+      }
+    },
+    "agents": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["red_team", "steelman", "logic", "fact_check"],
+      "properties": {
+        "red_team": { "$ref": "#/$defs/agent" },
+        "steelman": { "$ref": "#/$defs/agent" },
+        "logic": { "$ref": "#/$defs/agent" },
+        "fact_check": { "$ref": "#/$defs/agent" }
+      }
+    },
+    "synthesis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["survived", "failed", "hidden_assumptions", "key_crux", "improved_thesis"],
+      "properties": {
+        "survived": { "type": "string" },
+        "failed": { "type": "string" },
+        "hidden_assumptions": { "type": "array", "items": { "type": "string" } },
+        "key_crux": { "type": "string" },
+        "improved_thesis": { "type": "string" }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["execution_id", "model", "duration_ms"],
+      "properties": {
+        "execution_id": { "type": "string" },
+        "model": { "type": "string" },
+        "duration_ms": { "type": "number", "minimum": 0 },
+        "mode": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "tone", "summary", "count", "count_label", "findings"],
+      "properties": {
+        "name": { "type": "string" },
+        "tone": { "enum": ["red", "teal", "blue", "amber"] },
+        "summary": { "type": "string" },
+        "count": { "type": "integer", "minimum": 0 },
+        "count_label": { "type": "string" },
+        "findings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "detail", "claim_ids", "severity"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "detail": { "type": "string" },
+        "claim_ids": { "type": "array", "items": { "type": "string" } },
+        "severity": { "enum": ["low", "medium", "high"] },
+        "status": {
+          "enum": ["supported", "partially_supported", "mixed", "unsupported", "insufficient_evidence", "not_searched"]
+        },
+        "sources": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/source" }
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "publisher", "url", "relation"],
+      "properties": {
+        "title": { "type": "string" },
+        "publisher": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "relation": { "type": "string" }
+      }
+    }
+  }
+}

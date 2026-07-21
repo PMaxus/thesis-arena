@@ -1,0 +1,30 @@
+# Local secrets and environment overrides
+.env
+.env.*
+!.env.example
+*.secret
+*.credentials.json
+config.local.js
+
+# Private deployment handoff
+work/
+pmaxus-codex-handoff.txt
+pmaxus-github-key.txt
+
+# Private localization route (not part of the public release)
+ru/
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Runtime output
+node_modules/
+coverage/
+dist/
+*.log
+
+# Local visual QA artifact; the source SVG is committed
+assets/architecture-preview.png

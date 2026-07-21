@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a1218" />
+    <title>Thesis Arena — Analysis Report</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="report.css" />
+  </head>
+  <body>
+    <header class="report-toolbar">
+      <a href="index.html">← Back to analysis</a>
+      <span>Print-ready A4 report</span>
+      <button id="print-button" type="button">Print / Save as PDF</button>
+    </header>
+
+    <main id="report" class="report-sheet" hidden>
+      <header class="report-cover">
+        <div class="report-brand">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <path class="outer" d="M32 4 55 17v30L32 60 9 47V17Z" />
+            <path class="inner" d="m32 17 12 7v16l-12 7-12-7V24Z" />
+            <path class="red" d="m9 17 9 5" /><path class="teal" d="m46 22 9-5" />
+            <path class="blue" d="m55 47-9-5" /><path class="amber" d="m18 42-9 5" />
+          </svg>
+          <span>Thesis Arena</span>
+        </div>
+        <p>Argument stress-test report</p>
+        <h1 id="report-thesis"></h1>
+        <div id="report-meta" class="report-meta"></div>
+      </header>
+
+      <section class="report-section" aria-labelledby="report-claim-map-title">
+        <div class="report-section__heading"><span>01</span><h2 id="report-claim-map-title">Claim Map</h2></div>
+        <div id="report-claims" class="report-claims"></div>
+      </section>
+
+      <section class="report-section" aria-labelledby="report-lenses-title">
+        <div class="report-section__heading"><span>02</span><h2 id="report-lenses-title">Analytical Lenses</h2></div>
+        <div id="report-agents" class="report-agents"></div>
+      </section>
+
+      <section class="report-section report-synthesis" aria-labelledby="report-synthesis-title">
+        <div class="report-section__heading"><span>03</span><h2 id="report-synthesis-title">Synthesis</h2></div>
+        <div id="report-synthesis-grid" class="report-synthesis-grid"></div>
+      </section>
+
+      <footer class="report-footer">
+        <span>Thesis Arena</span>
+        <span>One claim · Four lenses · A stronger thesis</span>
+      </footer>
+    </main>
+
+    <section id="report-empty" class="report-empty" hidden>
+      <h1>No analysis report was found.</h1>
+      <p>Return to Thesis Arena, run an analysis, and choose Export report again.</p>
+      <a href="index.html">Return to Thesis Arena</a>
+    </section>
+
+    <script src="report.js"></script>
+  </body>
+</html>

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Stress-test any thesis through four independent analytical lenses." />
+    <meta name="theme-color" content="#050c12" />
+    <title>Thesis Arena — Stress-test your ideas</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4 55 17v30L32 60 9 47V17Z' fill='%23050c12' stroke='%23e8eef2' stroke-width='4'/%3E%3Cpath d='m32 17 12 7v16l-12 7-12-7V24Z' fill='none' stroke='%23e8eef2' stroke-width='3'/%3E%3Cpath d='m9 17 9 5' stroke='%23ff4a44' stroke-width='4'/%3E%3Cpath d='m46 22 9-5' stroke='%232ed3c6' stroke-width='4'/%3E%3Cpath d='m55 47-9-5' stroke='%234e82ff' stroke-width='4'/%3E%3Cpath d='m18 42-9 5' stroke='%23ffb814' stroke-width='4'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="app-state-initial">
+    <div class="ambient ambient--one" aria-hidden="true"></div>
+    <div class="ambient ambient--two" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Thesis Arena home">
+        <svg class="brand__mark" viewBox="0 0 64 64" aria-hidden="true">
+          <path class="brand__outer" d="M32 4 55 17v30L32 60 9 47V17Z" />
+          <path class="brand__inner" d="m32 17 12 7v16l-12 7-12-7V24Z" />
+          <path class="brand__red" d="m9 17 9 5" />
+          <path class="brand__teal" d="m46 22 9-5" />
+          <path class="brand__blue" d="m55 47-9-5" />
+          <path class="brand__amber" d="m18 42-9 5" />
+        </svg>
+        <span>Thesis Arena</span>
+      </a>
+      <div class="topbar__meta" aria-label="Application status">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span id="mode-label">Local analysis</span>
+      </div>
+    </header>
+
+    <main id="top" class="workspace">
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Reasoning instrument</p>
+          <h1 id="page-title">Stress-test your ideas.</h1>
+        </div>
+        <p class="intro__copy">Expose weak logic, missing evidence, and stronger arguments through four independent analytical lenses.</p>
+      </section>
+
+      <section id="input-section" class="input-section" aria-labelledby="input-heading">
+        <div class="section-heading">
+          <span class="section-heading__number">1</span>
+          <h2 id="input-heading">Input thesis</h2>
+          <span id="input-complete-badge" class="section-heading__badge" hidden>Analyzed</span>
+        </div>
+
+        <form id="claim-form" class="claim-form">
+          <div class="claim-form__field">
+            <label class="sr-only" for="claim-input">Thesis to analyze</label>
+            <textarea id="claim-input" name="claim" rows="3" maxlength="480" placeholder="Enter a claim you want to stress-test…" aria-describedby="claim-help claim-error" required>Universal basic income would improve society more than it would harm it.</textarea>
+            <div class="claim-form__footer">
+              <p id="claim-help">A clear, debatable statement works best.</p>
+              <span id="character-count" aria-live="polite">72 / 480</span>
+            </div>
+            <p id="claim-error" class="form-error" role="alert"></p>
+          </div>
+          <button id="analyze-button" class="analyze-button" type="submit">
+            <span class="analyze-button__label">Analyze thesis</span>
+            <span class="analyze-button__spinner" aria-hidden="true"></span>
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-4-4 4 4-4 4" /></svg>
+          </button>
+        </form>
+      </section>
+
+      <div id="analysis-region" class="analysis-region" hidden aria-live="polite">
+        <section id="analysis-loading" class="analysis-loading" hidden aria-labelledby="progress-title">
+          <div class="analysis-loading__beam" aria-hidden="true"></div>
+          <p class="eyebrow">Analysis in progress</p>
+          <h2 id="progress-title">Opening the arena</h2>
+          <ol id="progress-steps" class="progress-steps">
+            <li data-stage="mapping"><span></span>Mapping claims</li>
+            <li data-stage="lenses"><span></span>Testing the reasoning</li>
+            <li data-stage="fact_check"><span></span>Checking live evidence</li>
+            <li data-stage="synthesis"><span></span>Building synthesis</li>
+          </ol>
+          <div class="run-monitor" aria-label="Live execution status">
+            <span><small>Execution</small><strong id="progress-execution">Pending</strong></span>
+            <span><small>Elapsed</small><strong id="progress-elapsed">00:00</strong></span>
+            <span><small>n8n heartbeat</small><strong id="progress-heartbeat">Connecting…</strong></span>
+          </div>
+          <p id="progress-detail" class="progress-detail">Submitting the thesis to the protected workflow.</p>
+        </section>
+
+        <section id="analysis-error-panel" class="analysis-error-panel" hidden aria-labelledby="analysis-error-title">
+          <span class="analysis-error-panel__icon" aria-hidden="true">!</span>
+          <div>
+            <p class="eyebrow">Analysis interrupted</p>
+            <h2 id="analysis-error-title">The arena could not complete this run.</h2>
+            <p id="analysis-error-message">Please try again.</p>
+          </div>
+          <button id="retry-button" class="secondary-button" type="button">Retry analysis</button>
+        </section>
+
+        <div id="analysis-results" class="analysis-results" hidden>
+          <section id="claim-map-section" aria-labelledby="claim-map-heading">
+            <div class="section-heading">
+              <span class="section-heading__number">2</span>
+              <h2 id="claim-map-heading">Claim map</h2>
+            </div>
+            <div id="claim-map" class="claim-map"></div>
+          </section>
+
+          <section id="lenses-section" aria-labelledby="lenses-heading">
+            <div class="section-heading section-heading--split">
+              <div class="section-heading__group">
+                <span class="section-heading__number">3</span>
+                <h2 id="lenses-heading">Analytical lenses</h2>
+              </div>
+              <p>Open a lens to inspect its full report.</p>
+            </div>
+            <div id="lenses-grid" class="lenses-grid"></div>
+            <div id="lens-report-panel" class="lens-report-panel" hidden aria-live="polite"></div>
+          </section>
+
+          <section id="synthesis-section" aria-labelledby="synthesis-heading">
+            <div class="section-heading">
+              <span class="section-heading__number">4</span>
+              <h2 id="synthesis-heading">Synthesis</h2>
+            </div>
+            <div id="synthesis-grid" class="synthesis-grid"></div>
+          </section>
+
+          <aside id="analysis-meta" class="analysis-meta" aria-label="Analysis metadata"></aside>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <span>Thesis Arena</span>
+      <span>One claim. Four lenses. A stronger thesis.</span>
+    </footer>
+
+    <script src="config.js"></script>
+    <script src="mock-data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

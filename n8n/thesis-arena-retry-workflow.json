@@ -1,0 +1,223 @@
+{
+  "name": "Thesis Arena · Retry Execution",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "thesis-arena-retry",
+        "authentication": "none",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -650,
+        0
+      ],
+      "id": "8408871b-8684-4a1d-9146-7771e42478b0",
+      "name": "Retry Webhook",
+      "webhookId": "ba80c806-6414-449e-99bf-2173794bec3c"
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json.body ?? $json;\nconst headers = $json.headers ?? {};\nconst executionId = String(payload.execution_id ?? \"\").trim();\nconst accountUsername = String(headers[\"x-thesis-arena-user\"] ?? headers[\"X-Thesis-Arena-User\"] ?? \"\").trim().toLowerCase();\nif (!/^\\d+$/.test(executionId)) throw new Error(\"A numeric execution_id is required.\");\nif (!/^[a-z0-9_-]{1,64}$/.test(accountUsername)) throw new Error(\"A trusted account identity is required.\");\nreturn [{ json: { execution_id: executionId, account_username: accountUsername } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -390,
+        0
+      ],
+      "id": "817db05f-3157-45ee-acab-0e53fc9bd805",
+      "name": "Validate Retry Request"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ \"http://127.0.0.1:5678/api/v1/executions/\" + $json.execution_id + \"?includeData=true\" }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "n8nApi",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -120,
+        0
+      ],
+      "id": "ba1c7047-bf96-4e65-8c97-90cf972ec4d8",
+      "name": "Get Saved Execution",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000
+    },
+    {
+      "parameters": {
+        "jsCode": "const execution = $json;\nconst request = $(\"Validate Retry Request\").first().json;\nconst runData = execution.data?.resultData?.runData ?? {};\nconst nodeJson = (name) => {\n  const runs = runData[name] ?? [];\n  for (let index = runs.length - 1; index >= 0; index -= 1) {\n    const value = runs[index]?.data?.main?.[0]?.[0]?.json;\n    if (value && typeof value === \"object\") return value;\n  }\n  return null;\n};\nconst access = nodeJson(\"Attach Access\") ?? {};\nconst owner = String(access.access?.username ?? access.account_username ?? nodeJson(\"Prepare Request\")?.account_username ?? \"\");\nconst allowed = Boolean(execution.id) && String(execution.workflowId) === \"REPLACE_WITH_ANALYSIS_WORKFLOW_ID\" && owner === request.account_username;\nreturn [{\n  json: {\n    execution_id: request.execution_id,\n    account_username: request.account_username,\n    allowed,\n    reason: allowed ? \"allowed\" : \"not_found\"\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        150,
+        0
+      ],
+      "id": "47f22750-6094-4fe0-9e98-56b5f506e661",
+      "name": "Authorize Retry"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.allowed ? { state: \"retrying\", retry_of: $json.execution_id, poll_after_ms: 2500 } : { state: \"denied\", code: \"access_denied\", error: \"This execution is not available to the current account.\" } }}",
+        "options": {
+          "responseCode": "={{ $json.allowed ? 202 : 403 }}",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              },
+              {
+                "name": "X-Content-Type-Options",
+                "value": "nosniff"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        420,
+        0
+      ],
+      "id": "bf330466-f13a-49e8-9c8c-e535a4ed34ff",
+      "name": "Acknowledge Retry"
+    },
+    {
+      "parameters": {
+        "jsCode": "if (!$json.allowed) return [];\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        690,
+        0
+      ],
+      "id": "40c329f0-7cd1-4bf6-a63e-0db4d3ef4f03",
+      "name": "Continue If Retry Authorized"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"http://127.0.0.1:5678/api/v1/executions/\" + $(\"Validate Retry Request\").first().json.execution_id + \"/retry\" }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "n8nApi",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ loadWorkflow: true }) }}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        960,
+        0
+      ],
+      "id": "6e608646-ab3e-4d6b-9ea0-b37719ed3d95",
+      "name": "Retry Saved Execution",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000
+    }
+  ],
+  "connections": {
+    "Retry Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Retry Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Retry Request": {
+      "main": [
+        [
+          {
+            "node": "Get Saved Execution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Saved Execution": {
+      "main": [
+        [
+          {
+            "node": "Authorize Retry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authorize Retry": {
+      "main": [
+        [
+          {
+            "node": "Acknowledge Retry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Acknowledge Retry": {
+      "main": [
+        [
+          {
+            "node": "Continue If Retry Authorized",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continue If Retry Authorized": {
+      "main": [
+        [
+          {
+            "node": "Retry Saved Execution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  }
+}

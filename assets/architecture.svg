@@ -1,0 +1,209 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Thesis Arena system architecture</title>
+  <desc id="desc">A protected browser application submits a thesis through Nginx to three n8n workflows. Six GPT-5.6 Luna nodes create a claim map, four analytical reports, and a synthesis. PostgreSQL stores quotas, checkpoints, and completed reports while the interface progressively renders results and exports a printable report.</desc>
+
+  <defs>
+    <linearGradient id="page" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071015"/>
+      <stop offset="1" stop-color="#09131c"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#101c26"/>
+      <stop offset="1" stop-color="#0b1620"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#000" flood-opacity="0.28"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#738494"/>
+    </marker>
+    <style>
+      .eyebrow { font: 700 15px Inter, Arial, sans-serif; letter-spacing: 2.8px; text-transform: uppercase; fill: #2ed3c6; }
+      .title { font: 700 42px 'Space Grotesk', Inter, Arial, sans-serif; fill: #edf3f7; }
+      .subtitle { font: 400 17px Inter, Arial, sans-serif; fill: #94a5b4; }
+      .section { font: 700 14px Inter, Arial, sans-serif; letter-spacing: 1.9px; text-transform: uppercase; fill: #8fa1b0; }
+      .card-title { font: 700 20px 'Space Grotesk', Inter, Arial, sans-serif; fill: #edf3f7; }
+      .card-copy { font: 400 14px Inter, Arial, sans-serif; fill: #9cafbd; }
+      .small { font: 600 12px Inter, Arial, sans-serif; fill: #8fa1b0; }
+      .node-title { font: 700 14px Inter, Arial, sans-serif; fill: #edf3f7; }
+      .node-copy { font: 400 11px Inter, Arial, sans-serif; fill: #94a5b4; }
+      .line { fill: none; stroke: #738494; stroke-width: 2; marker-end: url(#arrow); }
+      .dash { fill: none; stroke: #50616f; stroke-width: 1.5; stroke-dasharray: 6 7; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" rx="28" fill="url(#page)"/>
+  <path d="M0 165H1600" stroke="#20313d"/>
+
+  <g transform="translate(58 48)">
+    <text class="eyebrow" x="0" y="18">System architecture</text>
+    <text class="title" x="0" y="72">One thesis. Six analytical nodes. One durable report.</text>
+    <text class="subtitle" x="0" y="111">Protected delivery, progressive results, checkpoint recovery, and a shared structured contract.</text>
+  </g>
+
+  <g transform="translate(58 205)" filter="url(#shadow)">
+    <rect width="230" height="250" rx="18" fill="url(#panel)" stroke="#304553"/>
+    <rect x="0" y="0" width="5" height="250" rx="2.5" fill="#e8eef2"/>
+    <text class="section" x="27" y="39">01 · Client</text>
+    <circle cx="49" cy="84" r="20" fill="#142531" stroke="#617786"/>
+    <path d="M39 78h20v14H39zm4-5h12" fill="none" stroke="#e8eef2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text class="card-title" x="27" y="127">Web interface</text>
+    <text class="card-copy" x="27" y="157">Submit one claim and read</text>
+    <text class="card-copy" x="27" y="179">each completed module while</text>
+    <text class="card-copy" x="27" y="201">the remaining lenses run.</text>
+    <rect x="27" y="218" width="150" height="20" rx="10" fill="#182933"/>
+    <text class="small" x="40" y="232">HTML · CSS · JavaScript</text>
+  </g>
+
+  <path class="line" d="M288 330H337"/>
+
+  <g transform="translate(338 205)" filter="url(#shadow)">
+    <rect width="225" height="250" rx="18" fill="url(#panel)" stroke="#304553"/>
+    <rect x="0" y="0" width="5" height="250" rx="2.5" fill="#4b7cff"/>
+    <text class="section" x="27" y="39">02 · Boundary</text>
+    <circle cx="49" cy="84" r="20" fill="#12223a" stroke="#4b7cff"/>
+    <path d="M42 84v-5a7 7 0 0114 0v5m-16 0h18v14H40z" fill="none" stroke="#6f97ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text class="card-title" x="27" y="127">Nginx gateway</text>
+    <text class="card-copy" x="27" y="157">Basic Auth, account identity,</text>
+    <text class="card-copy" x="27" y="179">rate limits, and server-side</text>
+    <text class="card-copy" x="27" y="201">webhook credential injection.</text>
+    <rect x="27" y="218" width="154" height="20" rx="10" fill="#132743"/>
+    <text class="small" x="40" y="232">No secret reaches the browser</text>
+  </g>
+
+  <path class="line" d="M563 330H612"/>
+
+  <g transform="translate(613 184)" filter="url(#shadow)">
+    <rect width="700" height="507" rx="22" fill="#09151e" stroke="#304553"/>
+    <rect x="0" y="0" width="700" height="60" rx="22" fill="#101f2a"/>
+    <path d="M0 60H700" stroke="#304553"/>
+    <circle cx="31" cy="30" r="7" fill="#ff4d4d"/>
+    <circle cx="55" cy="30" r="7" fill="#ffb000"/>
+    <circle cx="79" cy="30" r="7" fill="#2ed3c6"/>
+    <text class="card-title" x="105" y="37">n8n orchestration</text>
+    <text class="small" x="506" y="35">ASYNC · CHECKPOINTED</text>
+
+    <text class="section" x="29" y="92">Analysis workflow</text>
+
+    <g transform="translate(29 117)">
+      <rect width="151" height="102" rx="14" fill="#102233" stroke="#4b7cff"/>
+      <circle cx="24" cy="24" r="8" fill="#4b7cff"/>
+      <text class="node-title" x="42" y="29">Claim Mapper</text>
+      <text class="node-copy" x="17" y="57">Toulmin-inspired</text>
+      <text class="node-copy" x="17" y="75">decomposition + labels</text>
+      <text class="small" x="17" y="92">GPT-5.6 LUNA</text>
+    </g>
+
+    <path class="line" d="M180 168H217"/>
+
+    <g transform="translate(218 105)">
+      <rect width="282" height="236" rx="16" fill="#0d1b25" stroke="#304553"/>
+      <text class="section" x="18" y="27">Independent lenses</text>
+
+      <g transform="translate(17 44)">
+        <rect width="120" height="76" rx="11" fill="#21171c" stroke="#ff4d4d"/>
+        <circle cx="17" cy="18" r="6" fill="#ff4d4d"/>
+        <text class="node-title" x="30" y="23">Red Team</text>
+        <text class="node-copy" x="13" y="47">Pressure points</text>
+        <text class="small" x="13" y="65">LUNA</text>
+      </g>
+      <g transform="translate(146 44)">
+        <rect width="120" height="76" rx="11" fill="#10231f" stroke="#2ed3c6"/>
+        <circle cx="17" cy="18" r="6" fill="#2ed3c6"/>
+        <text class="node-title" x="30" y="23">Steelman</text>
+        <text class="node-copy" x="13" y="47">Strongest case</text>
+        <text class="small" x="13" y="65">LUNA</text>
+      </g>
+      <g transform="translate(17 130)">
+        <rect width="120" height="76" rx="11" fill="#121b2a" stroke="#4b7cff"/>
+        <circle cx="17" cy="18" r="6" fill="#4b7cff"/>
+        <text class="node-title" x="30" y="23">Logic</text>
+        <text class="node-copy" x="13" y="47">Inference gaps</text>
+        <text class="small" x="13" y="65">LUNA</text>
+      </g>
+      <g transform="translate(146 130)">
+        <rect width="120" height="76" rx="11" fill="#282113" stroke="#ffb000"/>
+        <circle cx="17" cy="18" r="6" fill="#ffb000"/>
+        <text class="node-title" x="30" y="23">Fact Check</text>
+        <text class="node-copy" x="13" y="47">Cited evidence</text>
+        <text class="small" x="13" y="65">LUNA · ONLINE</text>
+      </g>
+    </g>
+
+    <path class="line" d="M500 222H537"/>
+
+    <g transform="translate(538 117)">
+      <rect width="133" height="102" rx="14" fill="#17251f" stroke="#2ed3c6"/>
+      <circle cx="22" cy="24" r="8" fill="#2ed3c6"/>
+      <text class="node-title" x="39" y="29">Synthesizer</text>
+      <text class="node-copy" x="15" y="57">Double crux +</text>
+      <text class="node-copy" x="15" y="75">improved thesis</text>
+      <text class="small" x="15" y="92">GPT-5.6 LUNA</text>
+    </g>
+
+    <path class="dash" d="M104 219V374H286"/>
+    <path class="dash" d="M359 341V374"/>
+    <path class="dash" d="M604 219V374H438"/>
+
+    <g transform="translate(29 374)">
+      <rect width="642" height="104" rx="14" fill="#0d1b24" stroke="#304553"/>
+      <text class="section" x="19" y="27">Run control</text>
+      <g transform="translate(18 42)">
+        <rect width="184" height="43" rx="10" fill="#14242e"/>
+        <text class="node-title" x="14" y="20">Start webhook</text>
+        <text class="node-copy" x="14" y="35">Immediate acknowledgement</text>
+      </g>
+      <g transform="translate(220 42)">
+        <rect width="184" height="43" rx="10" fill="#14242e"/>
+        <text class="node-title" x="14" y="20">Status webhook</text>
+        <text class="node-copy" x="14" y="35">Progressive polling</text>
+      </g>
+      <g transform="translate(422 42)">
+        <rect width="202" height="43" rx="10" fill="#14242e"/>
+        <text class="node-title" x="14" y="20">Saved-run retry</text>
+        <text class="node-copy" x="14" y="35">Resume from checkpoint</text>
+      </g>
+    </g>
+  </g>
+
+  <path class="line" d="M1313 330H1353"/>
+
+  <g transform="translate(1354 205)" filter="url(#shadow)">
+    <rect width="188" height="250" rx="18" fill="url(#panel)" stroke="#304553"/>
+    <rect x="183" y="0" width="5" height="250" rx="2.5" fill="#ffb000"/>
+    <text class="section" x="23" y="39">03 · Output</text>
+    <circle cx="45" cy="84" r="20" fill="#282113" stroke="#ffb000"/>
+    <path d="M38 73h14l5 5v18H38zm14 0v6h5M42 85h11m-11 5h11" fill="none" stroke="#ffc84a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text class="card-title" x="23" y="127">Useful artifact</text>
+    <text class="card-copy" x="23" y="157">Claim map, full lens</text>
+    <text class="card-copy" x="23" y="179">reports, synthesis, and</text>
+    <text class="card-copy" x="23" y="201">print-ready A4 export.</text>
+    <rect x="23" y="218" width="122" height="20" rx="10" fill="#2c2515"/>
+    <text class="small" x="36" y="232">Shared JSON contract</text>
+  </g>
+
+  <g transform="translate(58 738)">
+    <rect width="1484" height="112" rx="18" fill="#0b1720" stroke="#304553"/>
+
+    <g transform="translate(27 22)">
+      <path d="M0 13C0 6 20 0 45 0s45 6 45 13v44c0 7-20 13-45 13S0 64 0 57z" fill="#10291f" stroke="#2ed3c6"/>
+      <path d="M0 13c0 7 20 13 45 13s45-6 45-13M0 35c0 7 20 13 45 13s45-6 45-13" fill="none" stroke="#2ed3c6" opacity=".6"/>
+      <text class="node-title" x="112" y="22">PostgreSQL</text>
+      <text class="card-copy" x="112" y="46">Account quotas · run state · paid-step checkpoints · final analysis archive</text>
+      <text class="small" x="112" y="66">Durable observability outside the workflow engine</text>
+    </g>
+
+    <path class="dash" d="M762 56H887"/>
+
+    <g transform="translate(922 23)">
+      <circle cx="22" cy="22" r="21" fill="#12223a" stroke="#4b7cff"/>
+      <path d="M12 22h20M22 12v20" stroke="#6f97ff" stroke-width="2"/>
+      <text class="node-title" x="57" y="20">Progressive experience</text>
+      <text class="card-copy" x="57" y="44">Completed modules remain readable while new artifacts arrive.</text>
+      <text class="small" x="57" y="65">A failed run can resume without replaying completed model calls.</text>
+    </g>
+  </g>
+
+  <path class="dash" d="M963 691V723"/>
+  <path class="dash" d="M445 455V704Q445 723 464 723H819"/>
+</svg>

@@ -1,0 +1,231 @@
+{
+  "name": "Thesis Arena · Execution Status",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "thesis-arena-status",
+        "authentication": "none",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -900,
+        0
+      ],
+      "id": "5592e758-97b5-4415-8f40-d7e2a5ede1fa",
+      "name": "Status Webhook",
+      "webhookId": "eabed466-c947-4674-8a12-d9f757309f85"
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json.body ?? $json;\nconst headers = $json.headers ?? {};\nconst executionId = String(payload.execution_id ?? \"\").trim();\nconst accountUsername = String(headers[\"x-thesis-arena-user\"] ?? headers[\"X-Thesis-Arena-User\"] ?? \"\").trim().toLowerCase();\nif (!/^\\d+$/.test(executionId)) throw new Error(\"A numeric execution_id is required.\");\nif (!/^[a-z0-9_-]{1,64}$/.test(accountUsername)) throw new Error(\"A trusted account identity is required.\");\nreturn [{ json: { requested_execution_id: executionId, account_username: accountUsername } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -650,
+        0
+      ],
+      "id": "ce61e33f-f3fc-40f3-a0f3-3fc055ed2752",
+      "name": "Validate Status Request"
+    },
+    {
+      "parameters": {
+        "resource": "execution",
+        "operation": "getAll",
+        "returnAll": false,
+        "limit": 25,
+        "filters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "REPLACE_WITH_ANALYSIS_WORKFLOW_ID",
+            "mode": "id"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        -390,
+        0
+      ],
+      "id": "5a13a4a3-2c30-49b4-89c2-cffb56141aee",
+      "name": "List Recent Executions"
+    },
+    {
+      "parameters": {
+        "jsCode": "const requestedId = $(\"Validate Status Request\").first().json.requested_execution_id;\nconst rows = $input.all().map((item) => item.json).filter((item) => item && item.id);\nlet effectiveId = requestedId;\nlet changed = true;\nwhile (changed) {\n  changed = false;\n  const retry = rows\n    .filter((item) => String(item.retryOf ?? \"\") === effectiveId)\n    .sort((a, b) => Number(b.id) - Number(a.id))[0];\n  if (retry) {\n    effectiveId = String(retry.id);\n    changed = true;\n  }\n}\nreturn [{ json: { requested_execution_id: requestedId, effective_execution_id: effectiveId } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -120,
+        0
+      ],
+      "id": "d6cb6f5d-203c-4ef9-a2be-d4e33d0ef620",
+      "name": "Resolve Effective Execution"
+    },
+    {
+      "parameters": {
+        "resource": "execution",
+        "operation": "get",
+        "executionId": "={{ $json.effective_execution_id }}",
+        "options": {
+          "activeWorkflows": true
+        }
+      },
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        150,
+        0
+      ],
+      "id": "24588da0-e660-4e71-b371-65152a7725ca",
+      "name": "Get Execution"
+    },
+    {
+      "parameters": {
+        "jsCode": "const execution = $json;\nconst resolved = $(\"Resolve Effective Execution\").first().json;\nif (!execution.id || String(execution.workflowId) !== \"REPLACE_WITH_ANALYSIS_WORKFLOW_ID\") {\n  return [{ json: { state: \"not_found\", execution_id: resolved.effective_execution_id, requested_execution_id: resolved.requested_execution_id } }];\n}\n\nconst runData = execution.data?.resultData?.runData ?? {};\nconst successful = (name) => Array.isArray(runData[name]) && runData[name].some((run) => !run.error);\nconst completedNodes = Object.keys(runData).filter(successful);\nconst nodeJson = (name) => {\n  const runs = runData[name] ?? [];\n  for (let index = runs.length - 1; index >= 0; index -= 1) {\n    const value = runs[index]?.data?.main?.[0]?.[0]?.json;\n    if (value && typeof value === \"object\") return value;\n  }\n  return null;\n};\nconst checkpointNames = [\"Store Fact Check\", \"Store Logic\", \"Store Steelman\", \"Store Red Team\", \"Store Claim Map\", \"Prepare Request\"];\nconst checkpoint = checkpointNames.map(nodeJson).find(Boolean) ?? {};\nconst accessCheckpoint = nodeJson(\"Attach Access\") ?? {};\nconst requester = String($(\"Validate Status Request\").first().json.account_username ?? \"\");\nconst owner = String(accessCheckpoint.access?.username ?? accessCheckpoint.account_username ?? nodeJson(\"Prepare Request\")?.account_username ?? \"\");\nif (!owner || owner !== requester) {\n  return [{\n    json: {\n      state: \"not_found\",\n      requested_execution_id: resolved.requested_execution_id,\n      execution_id: resolved.effective_execution_id,\n      authorized: false,\n      error: \"This execution is not available to the current account.\",\n      poll_after_ms: 2500,\n      persisted: false\n    }\n  }];\n}\nlet stage = \"queued\";\nlet stageLabel = \"Queued in n8n\";\nlet stageDetail = \"The workflow has been accepted and is waiting to start.\";\nlet progress = 2;\n\nif (successful(\"Prepare Request\")) {\n  stage = \"mapping\";\n  stageLabel = \"Mapping claims\";\n  stageDetail = \"n8n is decomposing the thesis into testable claims.\";\n  progress = 10;\n}\nif (successful(\"Store Claim Map\")) {\n  stage = \"lenses\";\n  stageLabel = \"Running Red Team\";\n  stageDetail = \"The claim map is complete. The reasoning lenses are now running.\";\n  progress = 25;\n}\nif (successful(\"Store Red Team\")) {\n  stageLabel = \"Running Steelman\";\n  stageDetail = \"Red Team completed. n8n is building the strongest defensible version.\";\n  progress = 38;\n}\nif (successful(\"Store Steelman\")) {\n  stageLabel = \"Checking logic\";\n  stageDetail = \"Steelman completed. n8n is checking warrants and causal links.\";\n  progress = 52;\n}\nif (successful(\"Store Logic\")) {\n  stage = \"fact_check\";\n  stageLabel = \"Checking evidence\";\n  stageDetail = \"The reasoning lenses are complete. Live source research is in progress.\";\n  progress = 66;\n}\nif (successful(\"Store Fact Check\")) {\n  stage = \"synthesis\";\n  stageLabel = \"Building synthesis\";\n  stageDetail = \"Fact Check completed. n8n is reconciling the findings and rewriting the thesis.\";\n  progress = 90;\n}\nif (successful(\"Assemble Response\")) {\n  stage = \"completed\";\n  stageLabel = \"Analysis complete\";\n  stageDetail = \"The complete result is ready.\";\n  progress = 100;\n}\n\nconst startedAt = execution.startedAt ? new Date(execution.startedAt).getTime() : Date.now();\nconst response = {\n  state: execution.status === \"success\" ? \"completed\" : execution.status,\n  requested_execution_id: resolved.requested_execution_id,\n  execution_id: String(execution.id),\n  retry_of: execution.retryOf == null ? null : String(execution.retryOf),\n  stage,\n  stage_label: stageLabel,\n  stage_detail: stageDetail,\n  progress,\n  completed_nodes: completedNodes,\n  started_at: execution.startedAt ?? null,\n  elapsed_ms: Math.max(0, Date.now() - startedAt),\n  heartbeat_at: new Date().toISOString(),\n  poll_after_ms: 2500,\n  authorized: true,\n  persisted: true,\n};\n\nif (checkpoint.thesis || Array.isArray(checkpoint.claims) || checkpoint.agents) {\n  response.partial = {\n    version: \"1.0\",\n    input: { thesis: String(checkpoint.thesis ?? \"\") },\n    claims: Array.isArray(checkpoint.claims) ? checkpoint.claims : [],\n    agents: checkpoint.agents && typeof checkpoint.agents === \"object\" ? checkpoint.agents : {},\n    meta: {\n      execution_id: String(execution.id),\n      model: checkpoint.models?.analysis\n        ? checkpoint.models.analysis + (checkpoint.models.fact_check ? \" · Fact Check: \" + checkpoint.models.fact_check : \"\")\n        : \"GPT-5.6 · live workflow\",\n      duration_ms: Math.max(0, Date.now() - startedAt),\n      mode: \"live\",\n      language: String(checkpoint.language ?? \"en\"),\n      account_username: owner,\n      access: accessCheckpoint.access ?? null,\n      analysis_model: String(checkpoint.models?.analysis ?? \"\"),\n      fact_check_model: String(checkpoint.models?.fact_check ?? \"\")\n    }\n  };\n}\n\nif (execution.status === \"success\") {\n  const runs = runData[\"Assemble Response\"] ?? [];\n  const finalRun = runs[runs.length - 1];\n  response.analysis = finalRun?.data?.main?.[0]?.[0]?.json ?? null;\n  if (response.analysis) response.partial = response.analysis;\n  if (!response.analysis) {\n    response.state = \"error\";\n    response.error = \"The execution completed without a readable analysis result.\";\n    response.retryable = false;\n  }\n}\n\nif ([\"error\", \"crashed\", \"canceled\"].includes(execution.status)) {\n  const resultError = execution.data?.resultData?.error;\n  response.stage = \"error\";\n  response.stage_label = \"Analysis interrupted\";\n  response.failed_node = execution.data?.resultData?.lastNodeExecuted ?? null;\n  response.error = String(resultError?.message ?? resultError?.description ?? \"The n8n execution stopped before completion.\").slice(0, 400);\n  response.retryable = execution.status !== \"canceled\";\n}\n\nreturn [{ json: response }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        0
+      ],
+      "id": "d8fa3be0-799a-4712-aafd-b4d1590e86f2",
+      "name": "Build Safe Status"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              },
+              {
+                "name": "X-Content-Type-Options",
+                "value": "nosniff"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        690,
+        0
+      ],
+      "id": "1799b696-fcff-4b63-806c-f6a18f27d8b5",
+      "name": "Respond with Status"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO thesis_arena.runs (\n  execution_id, account_username, thesis, language, status, stage, analysis_model,\n  fact_check_model, success, error, payload, duration_ms, started_at, finished_at, updated_at\n)\nSELECT\n  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12,\n  $13::timestamptz, $14::timestamptz, now()\nWHERE $15::boolean\nON CONFLICT (execution_id) DO UPDATE SET\n  account_username = COALESCE(NULLIF(EXCLUDED.account_username, ''), thesis_arena.runs.account_username),\n  thesis = EXCLUDED.thesis,\n  language = EXCLUDED.language,\n  status = EXCLUDED.status,\n  stage = EXCLUDED.stage,\n  analysis_model = EXCLUDED.analysis_model,\n  fact_check_model = EXCLUDED.fact_check_model,\n  success = EXCLUDED.success,\n  error = EXCLUDED.error,\n  payload = EXCLUDED.payload,\n  duration_ms = EXCLUDED.duration_ms,\n  started_at = COALESCE(thesis_arena.runs.started_at, EXCLUDED.started_at),\n  finished_at = COALESCE(EXCLUDED.finished_at, thesis_arena.runs.finished_at),\n  updated_at = now()\nRETURNING execution_id;",
+        "options": {
+          "queryReplacement": "={{ [\n        String($json.execution_id),\n        String($json.partial?.meta?.account_username ?? $json.analysis?.meta?.account_username ?? ''),\n        String($json.partial?.input?.thesis ?? $json.analysis?.input?.thesis ?? ''),\n        String($json.partial?.meta?.language ?? $json.analysis?.meta?.language ?? 'en'),\n        String($json.state ?? 'unknown'),\n        String($json.stage ?? 'unknown'),\n        String($json.partial?.meta?.analysis_model ?? $json.analysis?.meta?.model ?? ''),\n        String($json.partial?.meta?.fact_check_model ?? ''),\n        $json.state === 'completed',\n        String($json.error ?? ''),\n        JSON.stringify($json.analysis ?? $json.partial ?? {}),\n        Number($json.elapsed_ms ?? $json.analysis?.meta?.duration_ms ?? 0),\n        $json.started_at ?? new Date().toISOString(),\n        ['completed','error','crashed','canceled'].includes($json.state) ? new Date().toISOString() : null,\n        $json.authorized !== false\n      ] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        690,
+        220
+      ],
+      "id": "96cd9acc-6d0c-489e-9ef3-95b92d065641",
+      "name": "Archive Observed Status",
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Status Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Status Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Status Request": {
+      "main": [
+        [
+          {
+            "node": "List Recent Executions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Recent Executions": {
+      "main": [
+        [
+          {
+            "node": "Resolve Effective Execution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve Effective Execution": {
+      "main": [
+        [
+          {
+            "node": "Get Execution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Execution": {
+      "main": [
+        [
+          {
+            "node": "Build Safe Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Safe Status": {
+      "main": [
+        [
+          {
+            "node": "Respond with Status",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Archive Observed Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  }
+}
