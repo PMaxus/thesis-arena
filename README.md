@@ -40,6 +40,41 @@ The compact cards make the result scannable. Each card opens into a full report
 whose count is derived from the actual findings array. The final analysis can be
 exported as a print-ready PDF or sent through another stress-test cycle.
 
+## Product walkthrough
+
+### 1. Map the argument
+
+The Claim Mapper separates a complex thesis into individually inspectable claims
+and labels the kind of reasoning each claim requires.
+
+![Thesis Arena decomposing a thesis into a structured claim map](assets/walkthrough-claim-map.png)
+
+### 2. Run independent analytical lenses
+
+Red Team, Steelman, Logic, and Fact Check examine the same claim map from four
+different methodological perspectives. Results arrive progressively, so completed
+modules remain readable while the rest of the workflow continues.
+
+![Four Thesis Arena analytical lenses examining the same thesis](assets/walkthrough-analytical-lenses.png)
+
+<details>
+<summary><strong>Inspect a cited Fact Check report</strong></summary>
+
+Each externally verifiable claim receives an evidence status, explanation, and
+inspectable source links rather than an unsupported confidence score.
+
+![Thesis Arena Fact Check report with evidence statuses and cited sources](assets/walkthrough-fact-check.png)
+
+</details>
+
+### 3. Turn critique into a stronger thesis
+
+The final synthesis records what survived, what failed, the hidden assumptions,
+and the Key Crux before producing a more defensible formulation that can enter
+another stress-test cycle.
+
+![Thesis Arena synthesis and improved thesis](assets/walkthrough-synthesis.png)
+
 ## Architecture
 
 ![Thesis Arena architecture](assets/architecture.svg)
