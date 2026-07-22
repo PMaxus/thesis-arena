@@ -23,10 +23,12 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
-  min-width: 320px;
+  min-width: 0;
   margin: 0;
   overflow-x: hidden;
   background:
@@ -429,12 +431,22 @@ textarea::placeholder {
   font-family: "Space Grotesk", sans-serif;
 }
 
+.claim-card__content {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .claim-card h3 {
+  max-width: 100%;
   margin: 3px 0 16px;
   font-family: "Space Grotesk", sans-serif;
   font-size: clamp(15px, 1.3vw, 18px);
   font-weight: 500;
   line-height: 1.35;
+  overflow-wrap: break-word;
 }
 
 .claim-map[data-count="5"] .claim-card {
@@ -668,7 +680,14 @@ textarea::placeholder {
   .intro { grid-template-columns: 1fr; gap: 22px; }
   .intro__copy { max-width: 700px; }
   .claim-map { flex-direction: column; gap: 10px; }
-  .claim-arrow { flex-basis: auto; height: 20px; transform: rotate(90deg); }
+  .claim-card { flex: 0 0 auto; }
+  .claim-arrow {
+    flex: 0 0 20px;
+    align-self: center;
+    width: 20px;
+    height: 20px;
+    transform: rotate(90deg);
+  }
   .lenses-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
@@ -694,6 +713,20 @@ textarea::placeholder {
   .claim-form { padding: 15px; }
   textarea { min-height: 130px; font-size: 22px; }
   .claim-form__footer { align-items: flex-start; }
+  .claim-map { gap: 8px; }
+  .claim-card,
+  .claim-map[data-count="5"] .claim-card {
+    gap: 14px;
+    min-height: 0;
+    padding: 18px 16px;
+  }
+  .claim-card h3,
+  .claim-map[data-count="5"] .claim-card h3 {
+    margin: 2px 0 12px;
+    font-size: clamp(15px, 4.6vw, 18px);
+    line-height: 1.4;
+  }
+  .claim-arrow { height: 18px; }
   .lenses-grid { grid-template-columns: 1fr; }
   .lens-card { min-height: auto; }
   .lens-card p { min-height: auto; }

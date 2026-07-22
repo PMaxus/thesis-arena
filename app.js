@@ -361,6 +361,7 @@
       card.style.setProperty("--delay", `${index * 80}ms`);
       const number = createBadge(index + 1, "claim-card__number");
       const content = document.createElement("div");
+      content.className = "claim-card__content";
       const text = document.createElement("h3");
       text.textContent = claim.text;
       const tag = createBadge(claim.label || claim.type.replaceAll("_", " "), `claim-tag tone-${safeTone(claim.tone)}`);
