@@ -116,6 +116,26 @@
   let lastPartialSignature = "";
   let activeLensKey = null;
   let currentAccess = null;
+  const mobileLensLayout = window.matchMedia("(max-width: 560px)");
+
+  function syncLensReportPlacement() {
+    const activeCard = activeLensKey
+      ? elements.lensesGrid.querySelector(`[data-agent="${activeLensKey}"]`)
+      : null;
+
+    if (mobileLensLayout.matches && activeCard) {
+      activeCard.after(elements.lensReportPanel);
+      return;
+    }
+
+    elements.lensesGrid.after(elements.lensReportPanel);
+  }
+
+  if (typeof mobileLensLayout.addEventListener === "function") {
+    mobileLensLayout.addEventListener("change", syncLensReportPlacement);
+  } else {
+    mobileLensLayout.addListener(syncLensReportPlacement);
+  }
 
   const baseModeLabel = isRussian
     ? (config.mode === "webhook" ? copy.live : copy.local)
@@ -421,6 +441,7 @@
   }
 
   function renderLenses(agents) {
+    elements.lensesGrid.after(elements.lensReportPanel);
     elements.lensesGrid.replaceChildren();
     const preserveOpenReport = activeLensKey && agents[activeLensKey];
     if (!preserveOpenReport) {
@@ -464,6 +485,7 @@
       agent.findings.forEach((finding, findingIndex) => list.append(renderFinding(finding, findingIndex, key)));
       elements.lensReportPanel.append(reportHeading, list);
       elements.lensReportPanel.hidden = false;
+      syncLensReportPlacement();
     }
 
     agentOrder.forEach((key, index) => {
@@ -533,6 +555,7 @@
           activeLensKey = null;
           elements.lensReportPanel.hidden = true;
           elements.lensReportPanel.replaceChildren();
+          syncLensReportPlacement();
           return;
         }
 
@@ -546,7 +569,10 @@
       elements.lensesGrid.append(card);
     });
 
-    if (preserveOpenReport) setControlState(activeLensKey, true);
+    if (preserveOpenReport) {
+      setControlState(activeLensKey, true);
+      syncLensReportPlacement();
+    }
   }
 
   function synthesisCard(key, label, tone, value) {

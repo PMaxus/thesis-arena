@@ -1534,6 +1534,7 @@ textarea.is-scrollable {
   .synthesis-actions .stress-test-button,
   .synthesis-actions .export-button { width: 100%; }
   .lens-report-panel { padding: 20px 16px; }
+  .lenses-grid > .lens-report-panel { margin-top: 0; }
   .lens-report-panel__heading { display: block; }
   .lens-report-panel__heading .report-count { display: block; margin-top: 12px; }
   .finding { padding: 14px; }
